@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Pattern Puzzle</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f7f7f7;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .game-container {
+            display: grid;
+            grid-template-columns: repeat(4, 80px);
+            grid-gap: 5px;
+        }
+
+        .tile {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .tile.empty {
+            background-color: #ccc;
+            cursor: default;
+        }
+
+        .target {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 40px);
+            grid-gap: 5px;
+        }
+
+        .target-tile {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Color Pattern Puzzle</h1>
+    <div class="game-container" id="game-container"></div>
+    <div class="target" id="target"></div>
+    <button onclick="resetGame()">Reset Game</button>
+
+    <script>
+        const colors = ["red", "blue", "green", "yellow", "purple", "orange", "pink", "teal"];
+        let tiles = [];
+        let emptyIndex = 15; // Start with the last tile empty
+
+        // Generate a random target pattern
+        const targetPattern = Array.from({ length: 16 }, () => colors[Math.floor(Math.random() * colors.length)]);
+
+        // Initialize the game
+        function initGame() {
+            tiles = [...targetPattern]; // Copy target pattern
+            shuffle(tiles); // Shuffle tiles
+            renderGame();
+            renderTarget();
+        }
+
+        // Shuffle tiles
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            array[emptyIndex] = null; // Set the last tile as empty
+        }
+
+        // Render the game board
+        function renderGame() {
+            const container = document.getElementById("game-container");
+            container.innerHTML = "";
+            tiles.forEach((color, index) => {
+                const tile = document.createElement("div");
+                tile.classList.add("tile");
+                if (color) {
+                    tile.style.backgroundColor = color;
+                    tile.addEventListener("click", () => moveTile(index));
+                } else {
+                    tile.classList.add("empty");
+                }
+                container.appendChild(tile);
+            });
+        }
+
+        // Render the target pattern
+        function renderTarget() {
+            const target = document.getElementById("target");
+            target.innerHTML = "";
+            targetPattern.forEach(color => {
+                const tile = document.createElement("div");
+                tile.classList.add("target-tile");
+                tile.style.backgroundColor = color;
+                target.appendChild(tile);
+            });
+        }
+
+        // Move a tile
+        function moveTile(index) {
+            const row = Math.floor(index / 4);
+            const col = index % 4;
+            const emptyRow = Math.floor(emptyIndex / 4);
+            const emptyCol = emptyIndex % 4;
+
+            // Check if the tile is adjacent to the empty tile
+            if ((Math.abs(row - emptyRow) === 1 && col === emptyCol) ||
+                (Math.abs(col - emptyCol) === 1 && row === emptyRow)) {
+                // Swap the tile with the empty tile
+                [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
+                emptyIndex = index;
+                renderGame();
+                checkWin();
+            }
+        }
+
+        // Check if the player has won
+        function checkWin() {
+            if (tiles.every((color, index) => color === targetPattern[index])) {
+                alert("You win! Great job!");
+            }
+        }
+
+        // Reset the game
+        function resetGame() {
+            emptyIndex = 15;
+            initGame();
+        }
+
+        // Start the game
+        initGame();
+    </script>
+</body>
+</html>
