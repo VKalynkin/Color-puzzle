@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Puzzle</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 100px);
+      grid-template-rows: repeat(4, 100px);
+      gap: 5px;
+    }
+
+    .tile {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #3498db;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .empty {
+      background-color: #ecf0f1;
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+  <div class="grid" id="grid"></div>
+
+  <script>
+    const gridElement = document.getElementById('grid');
+    const gridSize = 4;
+    const totalTiles = gridSize * gridSize;
+    let tiles = [];
+
+    function createGrid() {
+      // Generate shuffled tiles
+      tiles = Array.from({ length: totalTiles - 1 }, (_, i) => i + 1);
+      tiles.push(null); // Add empty space
+      shuffle(tiles);
+
+      renderGrid();
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function renderGrid() {
+      gridElement.innerHTML = '';
+
+      tiles.forEach((tile, index) => {
+        const tileElement = document.createElement('div');
+        tileElement.className = 'tile';
+
+        if (tile === null) {
+          tileElement.classList.add('empty');
+        } else {
+          tileElement.textContent = tile;
+          tileElement.addEventListener('click', () => handleTileClick(index));
+        }
+
+        gridElement.appendChild(tileElement);
+      });
+    }
+
+    function handleTileClick(index) {
+      const emptyIndex = tiles.indexOf(null);
+
+      // Check if the clicked tile is adjacent to the empty tile
+      if (isAdjacent(index, emptyIndex)) {
+        // Swap the clicked tile with the empty tile
+        [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
+        renderGrid();
+      }
+    }
+
+    function isAdjacent(index1, index2) {
+      const row1 = Math.floor(index1 / gridSize);
+      const col1 = index1 % gridSize;
+      const row2 = Math.floor(index2 / gridSize);
+      const col2 = index2 % gridSize;
+
+      return (
+        (row1 === row2 && Math.abs(col1 - col2) === 1) ||
+        (col1 === col2 && Math.abs(row1 - row2) === 1)
+      );
+    }
+
+    createGrid();
+  </script>
+</body>
+</html>
